@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+from graphviz import Digraph
+
 
 class DTLearner:
-    def __init__(self, leaf_size=1, max_depth=2, verbose=False):
+    def __init__(self, leaf_size=1, max_depth=3, verbose=False):
         self.leaf_size = leaf_size
         self.max_depth = max_depth
         self.tree = None
@@ -59,10 +61,10 @@ class DTLearner:
             return ["Leaf", target.mean()]
 
         # Recursively build the left and right subtrees
-        print(f"Building left subtree at depth {depth + 1}")
+       # print(f"Building left subtree at depth {depth + 1}")
         left_tree = self.build_tree(left_data, features, left_target, depth + 1)
 
-        print(f"Building right subtree at depth {depth + 1}")
+       # print(f"Building right subtree at depth {depth + 1}")
         right_tree = self.build_tree(right_data, features, right_target, depth + 1)
 
         return [best_feature, split_val, left_tree, right_tree]
@@ -72,6 +74,7 @@ class DTLearner:
         self.features = features  # Store features for query usage
         self.tree = self.build_tree(data, features, target)
         print(f"Decision tree built and stored in self.tree")
+        self.visualize_tree(self.tree, 'decision_tree')
         
     def query(self, points):
         print(f"Querying the tree with input points")
@@ -96,6 +99,47 @@ class DTLearner:
                 return self.query_point(point, tree[2])
             else:
                 return self.query_point(point, tree[3])
+
+    def visualize_tree(self, tree, file_path, feature_names=None):
+
+        """
+        Visualize the decision tree using Graphviz.
+
+        Args:
+            tree (list): The decision tree to visualize.
+            file_path (str): The file path for saving the tree visualization.
+            feature_names (list): List of feature names.
+        """
+        dot = Digraph(comment='Decision Tree')
+        node_counter = [0]  # Use a list to have a mutable integer
+
+        def add_nodes_edges(tree, parent=None):
+            node_id = node_counter[0]
+            if tree[0] == 'Leaf':
+                label = f'Leaf: {tree[1]:.2f}'
+                dot.node(str(node_id), label, shape='box', style='filled', color='lightgrey')
+            else:
+                feature = tree[0]
+                split_val = tree[1]
+                label = f'{feature}\n<= {split_val:.2f}'
+                dot.node(str(node_id), label)
+                # Left child
+                node_counter[0] += 1
+                left_child_id = node_counter[0]
+                add_nodes_edges(tree[2], parent=node_id)
+                dot.edge(str(node_id), str(left_child_id), label='True')
+                # Right child
+                node_counter[0] += 1
+                right_child_id = node_counter[0]
+                add_nodes_edges(tree[3], parent=node_id)
+                dot.edge(str(node_id), str(right_child_id), label='False')
+            return
+
+        add_nodes_edges(tree)
+        # Save and render the graph
+        dot.render(file_path, format='png', cleanup=True)
+        print(f"Decision tree visualization saved to {file_path}.png")
+
 
 
 # Example usage with minimal data

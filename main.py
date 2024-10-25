@@ -11,9 +11,11 @@ def main():
     # Step 2: Create and train the decision tree learner
     learner = DTLearner(leaf_size=1, max_depth=2)  # You can adjust the leaf_size and max_depth as needed
     learner.add_evidence(data, features, target)
+    #learner.visualize_tree(learner.tree, 'decision_tree', features)
+
 
     # Step 3: Perform a dummy query (You can adjust this based on your data)
-    query_data = {'X11: Alcohol': 12.8, 'X10 Sulphates': 0.74, 'X2: Volatile Acidity': 72},
+    query_data = {'X11: Alcohol': 12.8, 'X10 Sulphates': 0.74, 'X2: Volatile Acidity': .72},
     prediction = learner.query(query_data)
     print(f"Prediction for query {query_data}: {prediction}")
 
