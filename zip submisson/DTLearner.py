@@ -16,19 +16,12 @@ class DTLearner:
         # Ensure correlations only include features, not the target
         correlations = correlations[features]
         tied_features = correlations[correlations.abs() == correlations.abs().max()].index.tolist()
-
-
-        if not tied_features:
-            # If tied_features is empty, return None
-            print("No valid features to select from. Returning None.")
-            return None
         if method == 'alphabetical':
             sorted_features = sorted(tied_features)
             print(f"\n***Tied features: {tied_features}")
             print(f"Sorted features: {sorted_features}")
-            if sorted_features[0] != None:
-                print(f"Selected feature: {sorted_features[0]}")
-                return sorted_features[0]
+            print(f"Selected feature: {sorted_features[0]}")
+            return sorted_features[0]
         elif method == 'random':
             return np.random.choice(tied_features)
         elif method == 'appearance':
@@ -53,11 +46,6 @@ class DTLearner:
         # Select the best feature based on correlations
         print(f"Selecting the best feature at depth {depth} from features: {features}")
         best_feature = self.select_best_feature(correlations, features, method='alphabetical')
-
-        if best_feature is None:
-            print(f"No valid feature selected at depth {depth}. Creating a leaf node.")
-            return ["Leaf", target.mean()]  # Create a leaf node if no feature is selected
-
         split_val = data[best_feature].median()
         print(f"Split value determined for feature {best_feature}: {split_val}")
 
@@ -81,7 +69,7 @@ class DTLearner:
 
         return [best_feature, split_val, left_tree, right_tree]
 
-    def add_evidence(self, data, features, target):# varies from outline
+    def add_evidence(self, data, features, target):
         print(f"Training model with data size: {len(data)}")
         self.features = features  # Store features for query usage
         self.tree = self.build_tree(data, features, target)
@@ -162,9 +150,9 @@ class DTLearner:
         dot.render(file_path, format='png', cleanup=True)
         print(f"Decision tree visualization saved to {file_path}.png")
 
-    def test_decision_tree(self, tree, features, expected_values):
+    def test_decision_tree(tree, features, expected_values):
         for i, data_point in enumerate(features):
-            predicted_value = self.query_point(data_point, tree)
+            predicted_value = predict(tree, data_point)
             expected_value = expected_values[i]
             print(f"Expected Value: {expected_value}, Predicted Value: {predicted_value:.2f}")
 
