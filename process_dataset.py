@@ -1,9 +1,10 @@
 import pandas as pd
 
 
-def process_dataset(file_path, ignore_first_column=False, target_column=None):
+def process_dataset(file_path, ignore_first_column=True, target_column=None):
     """
-    Loads and processes the dataset.
+
+        Loads and processes the dataset.
 
     Parameters:
     - file_path: str, the path to the dataset CSV file
@@ -17,7 +18,8 @@ def process_dataset(file_path, ignore_first_column=False, target_column=None):
     """
     # Load the dataset from the CSV file
     data = pd.read_csv(file_path)
-
+    columns_to_drop = ['weather']
+    data = data.drop([col for col in columns_to_drop if col in data.columns], axis=1)
     # Optionally ignore the first column
     if ignore_first_column:
         data = data.iloc[:, 1:]

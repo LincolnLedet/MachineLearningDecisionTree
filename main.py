@@ -57,11 +57,12 @@ def test_decision_tree(learner, test_features, expected_values, task_type):
 
 def main():
     # Step 1: Process the dataset
-    file_path = 'data/winequality-red.csv'
+    file_path = 'data/bikes.csv'
     #file_path = 'data/wine-simple.csv'
     data, features, target = process_dataset(file_path, ignore_first_column=True)
     print("\nSample of the loaded data:")
     print(data.head())
+
 
     if target.nunique() <= 10:  # Assuming 10 or fewer unique values is a classification problem
         task_type = 'classification'
@@ -75,7 +76,7 @@ def main():
 
     # Step 3: Create and train the decision tree
     #learner
-    learner = BagLearner(learner_type=DTLearner, kwargs={'leaf_size': 1, 'max_depth': 6}, num_learners=20, verbose=True)
+    learner = BagLearner(learner_type=DTLearner, kwargs={'leaf_size': 1, 'max_depth': 5}, num_learners=5, verbose=True)
     learner.add_evidence(data, features, target)
     learner.visualize_trees()
 
@@ -108,8 +109,9 @@ def main():
     {'temperature': -10, 'humidity': 0, 'windspeed': 100000},
     ]
 
-    # Convert the list of dictionaries to a pandas DataFrame
-    query_df = pd.DataFrame(query_points_wine)
+    # Convert the list of dictionaries to a pa
+    # ndas DataFrame
+    query_df = pd.DataFrame(query_points_bike)
 
 
     # Step 6: Query the learner with query_points_wine

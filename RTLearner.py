@@ -17,34 +17,43 @@ class RTLearner(DTLearner):
             return ["Leaf", target.mean()]  # Correct leaf node representation
 
         # Select a random feature at each node
-        print(f"Selecting the best feature at depth {depth} from features: {features}")
-        best_feature = np.random.choice(features)
+        print(f"Selecting the best feature at depth {depth} from features: {features}") # <------------------------
+        best_feature = np.random.choice(features) # <--------------------------------------------------------------
 
         if best_feature is None:
             print(f"No valid feature selected at depth {depth}. Creating a leaf node.")
-            return ["Leaf", target.mean()]  # Create a leaf node if no feature is selected
+            return ["Leaf", target.mean()]  # Create a leaf node if no feature is selected 
         
-        split_val = data[best_feature].median()
-        print(f"Split value determined for feature {best_feature}: {split_val}")
-
-        # Split data into left and right branches
-        left_data = data[data[best_feature] <= split_val]
-        right_data = data[data[best_feature] > split_val]
-        left_target = target[left_data.index]
-        right_target = target[right_data.index]
-
-        # Check for empty branches
-        if left_data.empty or right_data.empty:
-            print(f"No further split possible at depth {depth}, creating a leaf node.")
-            return ["Leaf", target.mean()]
-
-        # Recursively build the left and right subtrees
-       # print(f"Building left subtree at depth {depth + 1}")
-        left_tree = self.build_tree(left_data, features, left_target, depth + 1)
-
-       # print(f"Building right subtree at depth {depth + 1}")
-        right_tree = self.build_tree(right_data, features, right_target, depth + 1)
-
-        return [best_feature, split_val, left_tree, right_tree]
-
-    # Add any new methods specific to RTLearner here if needed
+            # Check if the feature is categorical
+        if data[best_feature].dtype == 'object':  # Categorical feature <------------------------
+            unique_values = data[best_feature].unique()
+            print(f"Splitting on categorical feature '{best_feature}' with values: {unique_values}")
+    
+            # Create a subtree for each unique value
+            subtrees = {}
+            for value in unique_values:
+                subset = data[data[best_feature] == value]
+                subset_target = target[subset.index]
+                subtrees[value] = self.build_tree(subset, features, subset_target, depth + 1)
+    
+            return [best_feature, subtrees]  # Return the feature and the subtrees for each category
+    
+        else:  # Numerical feature (use median split as before)
+            split_val = data[best_feature].median()
+            print(f"Split value determined for feature {best_feature}: {split_val}")
+    
+            left_data = data[data[best_feature] <= split_val]
+            right_data = data[data[best_feature] > split_val]
+            left_target = target[left_data.index]
+            right_target = target[right_data.index]
+    
+            if left_data.empty or right_data.empty:
+                print(f"No further split possible at depth {depth}, creating a leaf node.")
+                return ["Leaf", target.mean()]
+    
+            left_tree = self.build_tree(left_data, features, left_target, depth + 1)
+            right_tree = self.build_tree(right_data, features, right_target, depth + 1)
+    
+            return [best_feature, split_val, left_tree, right_tree]
+    
+        # Add any new methods specific to RTLearner here if needed
